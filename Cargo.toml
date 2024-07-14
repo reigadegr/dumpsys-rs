@@ -12,3 +12,11 @@ license = "GPL-3.0"
 binder = { package = "binder_ndk", git = "https://github.com/reigadegr/binder_rs" }
 os_pipe = "1.2.0"
 thiserror = "1.0.61"
+
+[profile.release]
+overflow-checks = false
+codegen-units = 1
+lto = "fat"
+opt-level = 3
+strip = true
+incremental = false
