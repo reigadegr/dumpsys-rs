@@ -9,6 +9,6 @@ description = "`dumpsys-rs` is a Rust library for retrieving and dumping service
 license = "GPL-3.0"
 
 [dependencies]
-binder = { package = "binder_ndk_sys", git = "https://github.com/reigadegr/binder_rs" }
+binder = { package = "binder_ndk", git = "https://github.com/reigadegr/binder_rs" }
 os_pipe = "1.2.0"
 thiserror = "1.0.61"
