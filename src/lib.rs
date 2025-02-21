@@ -67,10 +67,9 @@ impl Dumpsys {
             let mut service = self.service.clone();
             let (mut read, write) = os_pipe::pipe()?;
             let handle = thread::spawn(move || service.dump(&write, args));
-            let _ = read.read(&mut buf);
+            let _ = read.read_to_end(&mut buf);
             handle.join().unwrap()?;
         }
-
         Ok(buf)
     }
 }
