@@ -2,7 +2,7 @@ mod error;
 
 use std::{io::Read, thread};
 
-use binder::{binder_impl::IBinderInternal, get_service, SpIBinder};
+use binder::{binder_impl::IBinderInternal, check_service, SpIBinder};
 
 /// The main entry of this crate
 pub struct Dumpsys {
@@ -29,7 +29,7 @@ impl Dumpsys {
     where
         S: AsRef<str>,
     {
-        let service = get_service(service_name.as_ref())?;
+        let service = check_service(service_name.as_ref())?;
         Some(Self { service })
     }
 
