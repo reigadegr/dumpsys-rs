@@ -60,14 +60,14 @@ impl Dumpsys {
         Ok(buf)
     }
 
-    pub fn dump_to_byte(&self, args: &'static [&str]) -> Result<Vec<u8>, error::DumpError> {
-        let mut buf: Vec<u8> = Vec::new();
+    pub fn dump_to_byte(&self, args: &'static [&str]) -> Result<[u8; 1024], error::DumpError> {
+        let mut buf: [u8; 1024] = [0u8; 1024];
 
         {
             let mut service = self.service.clone();
             let (mut read, write) = os_pipe::pipe()?;
             let handle = thread::spawn(move || service.dump(&write, args));
-            let _ = read.read_to_end(&mut buf);
+            let _ = read.read(&mut buf);
             handle.join().unwrap()?;
         }
         Ok(buf)
