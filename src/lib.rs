@@ -60,8 +60,11 @@ impl Dumpsys {
         Ok(buf)
     }
 
-    pub fn dump_to_byte(&self, args: &'static [&str]) -> Result<[u8; 1024], error::DumpError> {
-        let mut buf: [u8; 1024] = [0u8; 1024];
+    pub fn dump_to_byte<const N: usize>(
+        &self,
+        args: &'static [&str],
+    ) -> Result<[u8; N], error::DumpError> {
+        let mut buf = [0u8; N];
 
         {
             let mut service = self.service.clone();
