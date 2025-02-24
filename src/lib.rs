@@ -60,6 +60,19 @@ impl Dumpsys {
         Ok(buf)
     }
 
+    /// # Example
+    ///
+    /// ```
+    /// use dumpsys_rs::Dumpsys;
+    ///
+    /// # fn foo() -> Option<()> {
+    /// let result = Dumpsys::new("SurfaceFlinger")?
+    ///     .dump_to_byte::<1024>(&["--latency"])
+    ///     .unwrap();
+    /// println!("{result}");
+    /// # Some(())
+    /// # }
+    /// ```
     pub fn dump_to_byte<const N: usize>(
         &self,
         args: &'static [&str],
