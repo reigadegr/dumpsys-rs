@@ -78,12 +78,20 @@ impl Dumpsys {
         args: &'static [&str],
     ) -> Result<[u8; N], error::DumpError> {
         let mut buf = [0u8; N];
+        let mut total_read = 0;
 
         {
             let mut service = self.service.clone();
             let (mut read, write) = os_pipe::pipe()?;
             let handle = thread::spawn(move || service.dump(&write, args));
-            let _ = read.read(&mut buf);
+            while total_read < N {
+                let n = read.read(&mut buf[total_read..])?;
+                if n == 0 {
+                    break;
+                }
+                total_read += n;
+            }
+
             handle.join().unwrap()?;
         }
         Ok(buf)
