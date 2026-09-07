@@ -4,6 +4,7 @@ mod task_thread;
 use std::{
     self,
     collections::HashMap,
+    fs::OpenOptions,
     hash::BuildHasherDefault,
     io::{self, PipeReader, PipeWriter, Read as _},
     ops::Deref,
@@ -67,6 +68,26 @@ pub fn dump_to_byte<S: AsRef<str>, const N: usize>(
     let service = hub::get_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
 
     dump_to_byte_inner(&task_thread, service, args)
+}
+
+/// Executes a dump request without reading or storing its output.
+///
+/// Output is discarded by the kernel through `/dev/null`; no pipe is created.
+///
+/// # Example
+///
+/// ```no_run
+/// # fn foo() -> Result<(), dumpsys_rs::error::Error> {
+/// dumpsys_rs::dump_only("SurfaceFlinger", &["--latency"])?;
+/// # Ok(())
+/// # }
+/// ```
+pub fn dump_only<S: AsRef<str>>(service_name: S, args: &[&str]) -> Result<()> {
+    _ = ProcessState::init_default();
+
+    let service = hub::get_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
+
+    dump_only_inner(service, args)
 }
 
 #[repr(transparent)]
@@ -141,6 +162,11 @@ impl BoundDumpsys {
     /// Dumps the bound service into a fixed-size byte array, zero-padding short output and truncating long output.
     pub fn dump_to_byte<const N: usize>(&self, args: &[&str]) -> Result<[u8; N]> {
         dump_to_byte_inner(&self.task_thread, self.service.clone(), args)
+    }
+
+    /// Executes a dump request on the bound service without reading or storing its output.
+    pub fn dump_only(&self, args: &[&str]) -> Result<()> {
+        dump_only_inner(self.service.clone(), args)
     }
 }
 
@@ -220,6 +246,15 @@ impl Dumpsys {
 
         dump_to_byte_inner(&self.task_thread, service.clone(), args)
     }
+
+    /// Executes a dump request on the selected service without reading or storing its output.
+    pub fn dump_only<S: AsRef<str>>(&mut self, service_name: S, args: &[&str]) -> Result<()> {
+        let service_name = service_name.as_ref();
+
+        let service = self.map.get(service_name).ok_or(Error::NoEntryFound)?;
+
+        dump_only_inner(service.clone(), args)
+    }
 }
 
 fn dump_inner(task_thread: &TaskThread, service: SIBinder, args: &[&str]) -> Result<String> {
@@ -243,6 +278,16 @@ fn dump_to_byte_inner<const N: usize>(
     check_status(&status_i32)?;
 
     Ok(buf)
+}
+
+fn dump_only_inner(service: SIBinder, args: &[&str]) -> Result<()> {
+    let proxy = service.as_proxy().ok_or(Error::InvalidMethod)?;
+    let null = OpenOptions::new().write(true).open("/dev/null")?;
+    let dump_args = DumpArgs::from_iter(args.iter().copied().map(String::from));
+
+    proxy.dump(null, &dump_args)?;
+
+    Ok(())
 }
 
 fn start_dump(

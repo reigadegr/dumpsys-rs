@@ -6,6 +6,7 @@
 
 - Retrieve handles for Android system services.
 - Perform dump operations on services to obtain detailed system state information.
+- Execute dump operations while discarding output at the kernel level.
 
 ## Usage
 
@@ -21,6 +22,12 @@ use dumpsys_rs::{Dumpsys, error::Error};
 let result: Result<String, Error> = Dumpsys::new("SurfaceFlinger")
     .unwrap()
     .dump(&["--latency"]);
+```
+
+To execute a dump request without reading its output:
+
+```rust
+dumpsys_rs::dump_only("SurfaceFlinger", &["--latency"])?;
 ```
 
 ## License
