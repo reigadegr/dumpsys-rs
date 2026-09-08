@@ -12,9 +12,9 @@ license = "GPL-3.0"
 name = "recents"
 
 [dependencies]
-thiserror = "^1"
+thiserror = "^2"
 twox-hash = { version = "^2", default-features = false, features = [
     "std",
     "xxhash3_64",
 ] }
-rsbinder = { version = "^0.5", features = ["android_11_plus"] }
+rsbinder = { version = "^0.10", features = ["android_11_plus"] }

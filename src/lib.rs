@@ -42,7 +42,7 @@ pub fn dump<S: AsRef<str>>(service_name: S, args: &[&str]) -> Result<String> {
 
     let task_thread = TaskThread::spawn();
 
-    let service = hub::get_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
+    let service = hub::check_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
 
     dump_inner(&task_thread, service, args)
 }
@@ -65,7 +65,7 @@ pub fn dump_to_byte<S: AsRef<str>, const N: usize>(
 
     let task_thread = TaskThread::spawn();
 
-    let service = hub::get_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
+    let service = hub::check_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
 
     dump_to_byte_inner(&task_thread, service, args)
 }
@@ -85,7 +85,7 @@ pub fn dump_to_byte<S: AsRef<str>, const N: usize>(
 pub fn dump_only<S: AsRef<str>>(service_name: S, args: &[&str]) -> Result<()> {
     _ = ProcessState::init_default();
 
-    let service = hub::get_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
+    let service = hub::check_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?;
 
     dump_only_inner(service, args)
 }
@@ -126,7 +126,7 @@ pub struct BoundDumpsys {
 }
 
 impl BoundDumpsys {
-    /// Retrieve an existing service and save it for dump, blocking for a few seconds if it doesn't yet exist.
+    /// Retrieve an existing service and save it for dump, failing immediately if it doesn't exist.
     ///
     /// # Example
     ///
@@ -150,7 +150,7 @@ impl BoundDumpsys {
         _ = ProcessState::init_default();
 
         Ok(Self {
-            service: hub::get_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?,
+            service: hub::check_service(service_name.as_ref()).ok_or(Error::ServiceNotExist)?,
             task_thread: TaskThread::spawn(),
         })
     }
@@ -190,7 +190,7 @@ impl Dumpsys {
         })
     }
 
-    /// Retrieve an existing service and save it for dump, blocking for a few seconds if it doesn't yet exist.
+    /// Retrieve an existing service and save it for dump, failing immediately if it doesn't exist.
     ///
     /// # Example
     ///
@@ -214,7 +214,7 @@ impl Dumpsys {
     pub fn insert_service<S: AsRef<str>>(&mut self, service_name: S) -> Result<bool> {
         let service_name = service_name.as_ref();
 
-        let service = hub::get_service(service_name).ok_or(Error::ServiceNotExist)?;
+        let service = hub::check_service(service_name).ok_or(Error::ServiceNotExist)?;
 
         Ok(self.map.insert(Box::from(service_name), service).is_some())
     }
