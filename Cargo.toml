@@ -17,4 +17,4 @@ twox-hash = { version = "^2", default-features = false, features = [
     "std",
     "xxhash3_64",
 ] }
-rsbinder = { version = "^0.10", features = ["android_11_plus"] }
+rsbinder = { version = "^0.10", path = "vendor/rsbinder", features = ["android_11_plus"] }
